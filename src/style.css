@@ -49,7 +49,7 @@ body {
 
 .history__line {
     display: grid;
-    grid-template-columns: 7fr 1fr 3fr;
+    grid-template-columns: 8fr 1fr 3fr;
     grid-auto-rows: 4.1rem;
     font-size: 1.5rem;
     align-items: center;
@@ -108,6 +108,7 @@ body {
     grid-template-columns: repeat(5, 1fr);
     grid-template-rows: repeat(5, 1fr);
     gap: 0.6rem;
+    width: 100%;
     padding: 1.2rem;
     background-color: var(--bg-color);
 }
@@ -163,4 +164,79 @@ body {
 
 .button[data-sign="back"]:hover {
     background-color: var(--red-lighter-color);
+}
+
+@media screen and (max-width: 1700px) {
+    .container {
+        width: 30%;
+    }
+    .buttons {
+        gap: 1rem;
+    }
+}
+
+@media screen and (max-width: 1200px) {
+    .container {
+        width: 40%;
+    }
+    .buttons {
+        gap: 1.1rem;
+    }
+}
+
+@media screen and (max-width: 900px) {
+    :root {
+        font-size: 56.25%;
+    }
+    .container {
+        width: 50%;
+    }
+    .buttons {
+        gap: 1.1rem;
+    }
+    .button {
+        padding: 0.5rem 1.5rem;
+    }
+}
+
+@media screen and (max-width: 650px) {
+    .container {
+        width: 70%;
+    }
+    .buttons {
+        gap: 1.1rem;
+    }
+    .button {
+        padding: 0.5rem 1.5rem;
+    }
+}
+
+@media screen and (max-width: 450px) {
+    :root {
+        font-size: 50%;
+    }
+    .container {
+        width: 70%;
+    }
+    .buttons {
+        gap: 1.1rem;
+    }
+    .button {
+        padding: 0.5rem 1.5rem;
+    }
+}
+
+@media screen and (max-width: 350px) {
+    :root {
+        font-size: 43.75%;
+    }
+    .container {
+        width: 90%;
+    }
+    .buttons {
+        gap: 1.1rem;
+    }
+    .button {
+        padding: 0.5rem 1.5rem;
+    }
 }

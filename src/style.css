@@ -134,7 +134,7 @@ body {
     background-color: var(--main-lighter-color);
 }
 
-.button[data-sign="="] {
+.button[data-sign="equal"] {
     grid-column: 5;
     grid-row: 4 / -1;
     background-color: var(--green-color);
@@ -144,11 +144,11 @@ body {
     box-shadow: 0.2px 0.3px 2px var(--green-lighter-color);
 }
 
-.button[data-sign="="]:active {
+.button[data-sign="equal"]:active {
     background-color: var(--green-darker-color);
 }
 
-.button[data-sign="="]:hover {
+.button[data-sign="equal"]:hover {
     background-color: var(--green-lighter-color);
 }
 

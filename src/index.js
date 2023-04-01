@@ -18,6 +18,12 @@ buttonsContainer.addEventListener("click", (e) => {
     ) {
         updateData(el.textContent);
     }
+    if (dataset === "percent" || dataset === "mod") {
+        if (!checkIfNumberBeforePresent()) {
+            return;
+        }
+        updateData(el.textContent);
+    }
     if (dataset === "clear") {
         if (data.lastIndexOf("**2")) {
             data = data.slice(0, -3);
@@ -37,6 +43,16 @@ buttonsContainer.addEventListener("click", (e) => {
 
     updateInputEl();
 });
+
+function checkIfNumberBeforePresent() {
+    if (data.includes("**2") && data.lastIndexOf("**2") === data.length - 3) {
+        return false;
+    }
+    if (typeof +data[data.length - 1] === "number" && isNaN(+data[data.length - 1])) {
+        return false;
+    }
+    return true;
+}
 
 function updateData(value) {
     data += value;

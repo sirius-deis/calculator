@@ -90,7 +90,6 @@ body {
     font-size: 2rem;
     background-color: transparent;
     color: var(--white-color);
-    border: 0;
     caret-color: var(--red-lighter-color);
 }
 
@@ -153,17 +152,17 @@ body {
     background-color: var(--green-lighter-color);
 }
 
-.button[data-sign="back"] {
+.button[data-sign="clear"] {
     background-color: var(--red-color);
     box-shadow: 0.2px 0.3px 2px var(--red-lighter-color);
     font-size: 2rem;
 }
 
-.button[data-sign="back"]:active {
+.button[data-sign="clear"]:active {
     background-color: var(--red-darker-color);
 }
 
-.button[data-sign="back"]:hover {
+.button[data-sign="clear"]:hover {
     background-color: var(--red-lighter-color);
 }
 

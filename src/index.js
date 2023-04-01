@@ -9,29 +9,34 @@ buttonsContainer.addEventListener("click", (e) => {
     const el = e.target.closest(".button");
     const dataset = Object.values(el.dataset)[0];
     if (!dataset) return;
-    if (dataset === "number" || dataset === "parentheses" || dataset === "pi") {
+    if (dataset === "number" || dataset === "parentheses" || dataset === "pi" || dataset === "comma") {
         updateData(el.textContent);
     }
     if (dataset === "sign") {
-        if (!checkIfPreviousIsNumber() && !checkIfPercentWithNumberIsPrevious()) {
+        if ((!checkIfPreviousIsNumber() && !checkIfPercentWithNumberIsPrevious()) || checkIfPreviousIsComma()) {
             return;
         }
         updateData(el.textContent);
     }
     if (dataset === "percent") {
-        if (!checkIfPreviousIsNumber()) {
+        if (!checkIfPreviousIsNumber() || checkIfPreviousIsComma()) {
             return;
         }
         updateData(el.textContent);
     }
     if (dataset === "root") {
-        if (checkIfSignBeforePresent(el.textContent) || checkIfPreviousIsNumber() || checkIfPreviousIsPercentOrMod()) {
+        if (
+            checkIfSignBeforePresent(el.textContent) ||
+            checkIfPreviousIsComma() ||
+            checkIfPreviousIsNumber() ||
+            checkIfPreviousIsPercentOrMod()
+        ) {
             return;
         }
         updateData(el.textContent);
     }
     if (dataset === "mod") {
-        if (!checkIfPreviousIsNumber() && !checkIfPercentWithNumberIsPrevious()) {
+        if (checkIfPreviousIsComma() || (!checkIfPreviousIsNumber() && !checkIfPercentWithNumberIsPrevious())) {
             return;
         }
         updateData(el.textContent);
@@ -39,11 +44,8 @@ buttonsContainer.addEventListener("click", (e) => {
     if (dataset === "clear") {
         clearInput();
     }
-    if (dataset === "comma") {
-        updateData(el.textContent);
-    }
     if (dataset === "**") {
-        if (checkIfSignBeforePresent("**2") || !checkIfPreviousIsNumber()) {
+        if (checkIfPreviousIsComma() || checkIfSignBeforePresent("**2") || !checkIfPreviousIsNumber()) {
             return;
         }
         updateData("**2");
@@ -88,6 +90,13 @@ function checkIfPreviousIsNumber() {
 
 function checkIfPercentWithNumberIsPrevious() {
     if (data.slice(data.length - 2).match(/\d%/)) {
+        return true;
+    }
+    return false;
+}
+
+function checkIfPreviousIsComma() {
+    if (data[data.length - 1] === ",") {
         return true;
     }
     return false;

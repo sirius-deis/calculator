@@ -9,26 +9,29 @@ buttonsContainer.addEventListener("click", (e) => {
     const el = e.target.closest(".button");
     const dataset = Object.values(el.dataset)[0];
     if (!dataset) return;
-    if (
-        dataset === "number" ||
-        dataset === "parentheses" ||
-        dataset === "sign" ||
-        dataset === "pi" ||
-        dataset === "root"
-    ) {
+    if (dataset === "number" || dataset === "parentheses" || dataset === "pi") {
+        updateData(el.textContent);
+    }
+    if (dataset === "sign") {
+        if (!checkIfPreviousIsNumber() && !checkIfPercentWithNumberIsPrevious()) {
+            return;
+        }
         updateData(el.textContent);
     }
     if (dataset === "percent") {
-        if (checkIfSignBeforePresent(el.textContent) || !checkIfPreviousIsNumber()) {
+        if (!checkIfPreviousIsNumber()) {
+            return;
+        }
+        updateData(el.textContent);
+    }
+    if (dataset === "root") {
+        if (checkIfSignBeforePresent(el.textContent) || checkIfPreviousIsNumber() || checkIfPreviousIsPercentOrMod()) {
             return;
         }
         updateData(el.textContent);
     }
     if (dataset === "mod") {
-        if (
-            checkIfSignBeforePresent(el.textContent) ||
-            (!checkIfPreviousIsNumber() && !checkIfPercentWithNumberIsPrevious())
-        ) {
+        if (!checkIfPreviousIsNumber() && !checkIfPercentWithNumberIsPrevious()) {
             return;
         }
         updateData(el.textContent);
@@ -61,6 +64,12 @@ function clearInput() {
     } else {
         data = data.slice(0, -1);
     }
+}
+function checkIfPreviousIsPercentOrMod() {
+    if (data[data.length - 1] === "%" || data.slice(data.length - 3) === "mod") {
+        return true;
+    }
+    return false;
 }
 
 function checkIfSignBeforePresent(sign) {

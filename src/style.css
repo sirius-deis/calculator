@@ -91,6 +91,7 @@ body {
     background-color: transparent;
     color: var(--white-color);
     border: 0;
+    caret-color: var(--red-lighter-color);
 }
 
 .input__panel:focus {

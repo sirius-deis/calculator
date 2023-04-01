@@ -6,7 +6,7 @@ const historyEl = document.querySelector(".history"),
 let data = "";
 
 buttonsContainer.addEventListener("click", (e) => {
-    const el = e.target;
+    const el = e.target.closest(".button");
     const dataset = Object.values(el.dataset)[0];
     if (!dataset) return;
     if (
@@ -19,13 +19,14 @@ buttonsContainer.addEventListener("click", (e) => {
         updateData(el.textContent);
     }
     if (dataset === "percent" || dataset === "mod") {
-        if (!checkIfNumberBeforePresent()) {
+        if (checkIfSignBeforePresent(el.textContent) || !checkIfPreviousIsNumber()) {
             return;
         }
         updateData(el.textContent);
     }
     if (dataset === "clear") {
-        if (data.lastIndexOf("**2")) {
+        if (data.lastIndexOf("**2") === data.length - 3 || data.lastIndexOf("mod") === data.length - 3) {
+            data.lastIndexOf("mod");
             data = data.slice(0, -3);
         } else {
             data = data.slice(0, -1);
@@ -35,6 +36,9 @@ buttonsContainer.addEventListener("click", (e) => {
         updateData(el.textContent);
     }
     if (dataset === "**") {
+        if (checkIfSignBeforePresent("**2")) {
+            return;
+        }
         updateData("**2");
     }
     if (dataset === "equal") {
@@ -44,15 +48,32 @@ buttonsContainer.addEventListener("click", (e) => {
     updateInputEl();
 });
 
-function checkIfNumberBeforePresent() {
-    if (data.includes("**2") && data.lastIndexOf("**2") === data.length - 3) {
-        return false;
+function checkIfSignBeforePresent(sign) {
+    if (data.slice(data.length - sign.length) === sign) {
+        return true;
     }
-    if (typeof +data[data.length - 1] === "number" && isNaN(+data[data.length - 1])) {
-        return false;
-    }
-    return true;
+    return false;
 }
+
+function checkIfPreviousIsNumber() {
+    if (typeof +data[data.length - 1] === "number" && !isNaN(+data[data.length - 1])) {
+        return true;
+    }
+    return false;
+}
+
+// function checkIfNumberBeforePresent(operation) {
+//     console.log(data.slice(data.length - 2).match(/\n%/));
+//     if (data.slice(data.length - 2).match(/\n%/)) {
+//     }
+//     if (data.includes("**2") && data.lastIndexOf("**2") === data.length - 3) {
+//         return true;
+//     }
+//     if (typeof +data[data.length - 1] === "number" && isNaN(+data[data.length - 1])) {
+//         return true;
+//     }
+//     return false;
+// }
 
 function updateData(value) {
     data += value;

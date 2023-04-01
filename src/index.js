@@ -18,25 +18,29 @@ buttonsContainer.addEventListener("click", (e) => {
     ) {
         updateData(el.textContent);
     }
-    if (dataset === "percent" || dataset === "mod") {
+    if (dataset === "percent") {
         if (checkIfSignBeforePresent(el.textContent) || !checkIfPreviousIsNumber()) {
             return;
         }
         updateData(el.textContent);
     }
-    if (dataset === "clear") {
-        if (data.lastIndexOf("**2") === data.length - 3 || data.lastIndexOf("mod") === data.length - 3) {
-            data.lastIndexOf("mod");
-            data = data.slice(0, -3);
-        } else {
-            data = data.slice(0, -1);
+    if (dataset === "mod") {
+        if (
+            checkIfSignBeforePresent(el.textContent) ||
+            (!checkIfPreviousIsNumber() && !checkIfPercentWithNumberIsPrevious())
+        ) {
+            return;
         }
+        updateData(el.textContent);
+    }
+    if (dataset === "clear") {
+        clearInput();
     }
     if (dataset === "comma") {
         updateData(el.textContent);
     }
     if (dataset === "**") {
-        if (checkIfSignBeforePresent("**2")) {
+        if (checkIfSignBeforePresent("**2") || !checkIfPreviousIsNumber()) {
             return;
         }
         updateData("**2");
@@ -47,6 +51,17 @@ buttonsContainer.addEventListener("click", (e) => {
 
     updateInputEl();
 });
+
+function clearInput() {
+    if (
+        data.length !== 2 &&
+        (data.lastIndexOf("**2") === data.length - 3 || data.lastIndexOf("mod") === data.length - 3)
+    ) {
+        data = data.slice(0, -3);
+    } else {
+        data = data.slice(0, -1);
+    }
+}
 
 function checkIfSignBeforePresent(sign) {
     if (data.slice(data.length - sign.length) === sign) {
@@ -62,18 +77,12 @@ function checkIfPreviousIsNumber() {
     return false;
 }
 
-// function checkIfNumberBeforePresent(operation) {
-//     console.log(data.slice(data.length - 2).match(/\n%/));
-//     if (data.slice(data.length - 2).match(/\n%/)) {
-//     }
-//     if (data.includes("**2") && data.lastIndexOf("**2") === data.length - 3) {
-//         return true;
-//     }
-//     if (typeof +data[data.length - 1] === "number" && isNaN(+data[data.length - 1])) {
-//         return true;
-//     }
-//     return false;
-// }
+function checkIfPercentWithNumberIsPrevious() {
+    if (data.slice(data.length - 2).match(/\d%/)) {
+        return true;
+    }
+    return false;
+}
 
 function updateData(value) {
     data += value;

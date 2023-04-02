@@ -72,6 +72,19 @@ dummyInputEl.addEventListener("input", (e) => {
     const data = e.target.value;
     if (data.length > 1) {
         for (let i = 0; i < data.length; i++) {
+            if (data[i] === "*" && data[i + 1] === "*" && data[i + 2] === "2") {
+                checkValidity("**2");
+                i += 2;
+                continue;
+            }
+            if (data[i] === "*") {
+                checkValidity("×");
+                continue;
+            }
+            if (data[i] === "/") {
+                checkValidity("÷");
+                continue;
+            }
             checkValidity(data[i]);
         }
         updateInputEl();
@@ -129,7 +142,7 @@ function checkValidity(character) {
         updateEquation(character);
     }
     if (character === "π") {
-        if (isSignBeforePresent("π") || isPreviousNumber()) {
+        if (isSignBeforePresent("π")) {
             return;
         }
         updateEquation(character);
@@ -172,11 +185,15 @@ function showResult() {
         return;
     }
     const result = parseInput(equation);
+    console.log(result);
     if (!result.match(/^\d+\.?\d*$/)) {
         updateInfo("Malformed expression");
         return;
     }
     parseInput(equation);
+    if (inputInfoEl.textContent) {
+        clearInfo();
+    }
     updateHistory(equation, result);
     clearEquation();
 }
@@ -229,11 +246,10 @@ function updateHistory(equation, result) {
     historyEl.insertAdjacentElement("afterbegin", historyLine);
 }
 
-//#TODO:
 function updateInfo(info) {
     inputInfoEl.textContent = info;
 }
-//#TODO:
+
 function clearInfo() {
     inputInfoEl.textContent = "";
 }
@@ -242,9 +258,6 @@ function isNumberAllowed() {
     if (equation.slice(equation.length - 1) === "π") {
         return false;
     }
-    // if (equation.match(/[\+|-|×|÷]/) && !["+", "-", "×", "÷"].includes(equation[equation.length - 1])) {
-    //     return false;
-    // }
     return true;
 }
 

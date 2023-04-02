@@ -316,5 +316,11 @@ describe("#parseInput", () => {
             const correctResult = (((4 + 76) / 2 ** 2) * 24 - Math.sqrt(42)) * Math.PI;
             expect(result).toBe(correctResult.toString());
         });
+        it("should return result of (5π+4**2-√6)(2**2*53%)", () => {
+            const data = "(5π+4**2-√6)(2**2×53%)";
+            const result = parseInput(data);
+            const correctResult = (5 * Math.PI + 4 ** 2 - Math.sqrt(6)) * (2 ** 2 * (53 / 100));
+            expect(result).toBe(correctResult.toString());
+        });
     });
 });

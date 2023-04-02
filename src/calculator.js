@@ -10,10 +10,13 @@ export function parseInput(data) {
     const parsedString = data;
     const stringWithParsedParentheses = parsedString
         .replace(/(\d+\.?\d*)\(/g, (match) => {
-            return `${match.slice(0, 1)}*${match.slice(1)}`;
+            return `${match.slice(0, 1)}×${match.slice(1)}`;
         })
         .replace(/\)(\d+\.?\d*)/g, (match) => {
-            return `${match.slice(0, 1)}*${match.slice(1)}`;
+            return `${match.slice(0, 1)}×${match.slice(1)}`;
+        })
+        .replace(/\)\(/, (match) => {
+            return `${match.slice(0, 1)}×${match.slice(1)}`;
         });
     const stringWithParsedPi = stringWithParsedParentheses
         .replace(/\d+π/g, (match) => {
@@ -45,10 +48,12 @@ function processInput(data) {
         const [extracted, equation] = PARENTHESES_REGEXP.exec(expression);
         const result = processInput(equation);
         expression = expression.replace(extracted, result);
+        console.log(expression);
         return processInput(expression);
     } else if (MULTIPLY_DIVISION_REGEXP.test(expression)) {
         const [extracted, number1, operand, number2] = MULTIPLY_DIVISION_REGEXP.exec(expression);
         const result = calculate(number1, operand, number2);
+        console.log(expression);
         expression = expression.replace(extracted, result);
         return processInput(expression);
     } else if (PLUS_MINUS_REGEXP.test(expression)) {

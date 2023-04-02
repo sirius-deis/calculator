@@ -184,6 +184,22 @@ describe("#MOD_REGEXP", () => {
         const result = MOD_REGEXP.test(data);
         expect(result).toBeFalsy();
     });
+    it("should return false as there is a sign before first number", () => {
+        const data = "+45.25mod5.1";
+        const result = MOD_REGEXP.test(data);
+        expect(result).toBeFalsy();
+    });
+    it("should return false as there is a sign before first number", () => {
+        const data = "-27.25mod3";
+        const result = MOD_REGEXP.test(data);
+        expect(result).toBeFalsy();
+    });
+    it("should return numbers", () => {
+        const data = "21.3mod3.1";
+        const { number1, number2 } = data.match(MOD_REGEXP).groups;
+        expect(number1).toBe("21.3");
+        expect(number2).toBe("3.1");
+    });
 });
 
 describe("#SQUARE_REGEXP", () => {
@@ -246,5 +262,25 @@ describe("#processInput", () => {
         const data = "532.352÷241.5224";
         const result = processInput(data);
         expect(result).toBe((532.352 / 241.5224).toString());
+    });
+    it("should return result of square of 4", () => {
+        const data = "4**2";
+        const result = processInput(data);
+        expect(result).toBe((4 ** 2).toString());
+    });
+    it("should return result of square of 15.342", () => {
+        const data = "15.342**2";
+        const result = processInput(data);
+        expect(result).toBe((15.342 ** 2).toString());
+    });
+    it("should return result of square root of 8", () => {
+        const data = "√8";
+        const result = processInput(data);
+        expect(result).toBe(Math.sqrt(8).toString());
+    });
+    it("should return result of square root of 285.2322", () => {
+        const data = "√285.2322";
+        const result = processInput(data);
+        expect(result).toBe(Math.sqrt(285.2322).toString());
     });
 });

@@ -1,95 +1,322 @@
-export const SQUARE_REGEXP = /(?<number>\d+\.?\d*)(?<operand>\*{2}2)/;
-export const ROOT_REGEXP = /√\s*(?<number>\d+\.?\d*)/;
-export const PERCENT_REGEXP = /(?<number>\d+\.?\d*)%/;
-export const PARENTHESES_REGEXP = /\((?<equation>[^\(\)]+)\)/;
-export const MULTIPLY_DIVISION_REGEXP = /(?<number1>\d+\.?\d*)(?<operand>[×÷])(?<number2>\d+\.?\d*)/;
-export const PLUS_MINUS_REGEXP = /(?<number1>\d+\.?\d*)(?<operand>[\+-])(?<number2>\d+\.?\d*)/;
-export const MOD_REGEXP = /(?<![+-×÷])(?<number1>\d+\.?\d*)mod(?<number2>\d+\.?\d*)/;
+import { parseInput } from "./calculate.js";
+const historyEl = document.querySelector(".history"),
+    inputPanelEl = document.querySelector(".input__panel"),
+    inputInfoEl = document.querySelector(".input__info"),
+    buttonsContainer = document.querySelector(".buttons"),
+    dummyInputEl = document.querySelector(".input__dummy");
 
-export function parseInput(data) {
-    const parsedString = data;
-    const stringWithParsedParentheses = parsedString
-        .replace(/(\d+\.?\d*)\(/g, (match) => {
-            return `${match.slice(0, 1)}×${match.slice(1)}`;
-        })
-        .replace(/\)(\d+\.?\d*)/g, (match) => {
-            return `${match.slice(0, 1)}×${match.slice(1)}`;
-        })
-        .replace(/\)\(/, (match) => {
-            return `${match.slice(0, 1)}×${match.slice(1)}`;
-        });
-    const stringWithParsedPi = stringWithParsedParentheses
-        .replace(/\d+π/g, (match) => {
-            return `${match.slice(0, -1)}×${match.slice(match.length - 1)}`;
-        })
-        .replaceAll("π", Math.PI);
-    const result = processInput(stringWithParsedPi);
-    return result;
+let equation = "";
+
+buttonsContainer.addEventListener("click", (e) => {
+    const el = e.target.closest(".button");
+    if (!el) {
+        return;
+    }
+    const dataset = Object.values(el.dataset)[0];
+    if (["number", "parentheses", "dot", "pi", "sign", "percent", "root", "mod"].includes(dataset)) {
+        checkValidity(el.textContent);
+    }
+
+    if (dataset === "**2") {
+        checkValidity(dataset);
+    }
+    if (dataset === "clear") {
+        removeOneCharacter();
+    }
+    if (dataset === "equal") {
+        showResult();
+    }
+
+    updateInputEl();
+});
+
+inputPanelEl.addEventListener("click", () => {
+    dummyInputEl.value = "";
+    dummyInputEl.focus();
+});
+
+window.addEventListener("keydown", (e) => {
+    const code = e.code;
+    const shift = e.shiftKey;
+    if (code.startsWith("Digit") && !shift) {
+        checkValidity(code.slice(code.length - 1));
+    }
+    if (["Digit9", "Digit0"].includes(code) && shift) {
+        checkValidity(code.endsWith("9") ? "(" : ")");
+    }
+    if (["Backslash", "Digit8", "Equal", "Minus", "Digit5"].includes(code) && shift) {
+        let digit;
+        if (code === "Backslash") {
+            digit = "÷";
+        } else if (code === "Digit8") {
+            digit = "×";
+        } else if (code === "Equal") {
+            digit = "+";
+        } else if (code === "Minus") {
+            digit = "-";
+        } else {
+            digit = "%";
+        }
+        checkValidity(digit);
+    }
+    if (code === "Backspace") {
+        removeOneCharacter();
+    }
+    if (code === "Enter") {
+        showResult();
+    }
+    updateInputEl();
+});
+
+dummyInputEl.addEventListener("input", (e) => {
+    const data = e.target.value;
+    if (data.length > 1) {
+        for (let i = 0; i < data.length; i++) {
+            if (data[i] === "*" && data[i + 1] === "*" && data[i + 2] === "2") {
+                checkValidity("**2");
+                i += 2;
+                continue;
+            }
+            if (data[i] === "*") {
+                checkValidity("×");
+                continue;
+            }
+            if (data[i] === "/") {
+                checkValidity("÷");
+                continue;
+            }
+            checkValidity(data[i]);
+        }
+        updateInputEl();
+    }
+    e.target.value = "";
+});
+
+document.querySelector('[data-sign="clear"]').addEventListener("contextmenu", (e) => {
+    e.preventDefault();
+    clearEquation();
+    updateInputEl();
+});
+
+historyEl.addEventListener("click", (e) => {
+    const target = e.target;
+    const line = target.closest(".history__line");
+    if (!line) return;
+    let equation;
+    if (target.className.includes("history__left")) {
+        equation = line.firstElementChild.textContent;
+        replaceEquation(equation);
+    }
+    if (target.className.includes("history__right") && isNumberAllowed()) {
+        equation = line.lastElementChild.textContent;
+        updateEquation(equation);
+    }
+    updateInputEl();
+});
+
+historyEl.addEventListener("contextmenu", (e) => {
+    e.preventDefault();
+    const target = e.target;
+    const line = target.closest(".history__line");
+    if (!line) return;
+    line.remove();
+});
+
+function checkValidity(character) {
+    if (typeof +character === "number" && !isNaN(+character)) {
+        if (!isNumberAllowed()) {
+            return;
+        }
+        updateEquation(character);
+    }
+    if (["(", ")"].includes(character)) {
+        if (!isParenthesesAllowed(character)) {
+            return;
+        }
+        updateEquation(character);
+    }
+    if (character === ".") {
+        if (!isPreviousNumber() || !isDoteAllowed()) {
+            return;
+        }
+        updateEquation(character);
+    }
+    if (character === "π") {
+        if (isSignBeforePresent("π")) {
+            return;
+        }
+        updateEquation(character);
+    }
+    if (["+", "-", "×", "÷"].includes(character)) {
+        if ((!isPreviousNumber() && !isPreviousParentheses() && !isSignBeforePresent("%")) || isPreviousDot()) {
+            return;
+        }
+        updateEquation(character);
+    }
+    if (character === "%") {
+        if (!isPreviousNumber() || isPreviousDot()) {
+            return;
+        }
+        updateEquation(character);
+    }
+    if (character === "√") {
+        if (isSignBeforePresent(character) || isPreviousDot() || isPreviousNumber() || isPreviousPercentOrMod()) {
+            return;
+        }
+        updateEquation(character);
+    }
+    if (character === "mod") {
+        if (isPreviousDot() || !isPreviousNumber()) {
+            return;
+        }
+        updateEquation(character);
+    }
+
+    if (character === "**2") {
+        if (isPreviousDot() || isSignBeforePresent("**2") || !isPreviousNumber()) {
+            return;
+        }
+        updateEquation(character);
+    }
 }
 
-function processInput(data) {
-    let expression = data;
-    if (SQUARE_REGEXP.test(expression)) {
-        const [extracted, number, operand] = SQUARE_REGEXP.exec(expression);
-        const result = calculate(number, operand);
-        expression = expression.replace(extracted, result);
-        return processInput(expression);
-    } else if (ROOT_REGEXP.test(expression)) {
-        const [extracted, number] = ROOT_REGEXP.exec(expression);
-        const result = calculate(number, "root");
-        expression = expression.replace(extracted, result);
-        return processInput(expression);
-    } else if (PERCENT_REGEXP.test(expression)) {
-        const [extracted, number] = PERCENT_REGEXP.exec(expression);
-        const result = calculate(number, "percent");
-        expression = expression.replace(extracted, result);
-        return processInput(expression);
-    } else if (PARENTHESES_REGEXP.test(expression)) {
-        const [extracted, equation] = PARENTHESES_REGEXP.exec(expression);
-        const result = processInput(equation);
-        expression = expression.replace(extracted, result);
-        console.log(expression);
-        return processInput(expression);
-    } else if (MULTIPLY_DIVISION_REGEXP.test(expression)) {
-        const [extracted, number1, operand, number2] = MULTIPLY_DIVISION_REGEXP.exec(expression);
-        const result = calculate(number1, operand, number2);
-        console.log(expression);
-        expression = expression.replace(extracted, result);
-        return processInput(expression);
-    } else if (PLUS_MINUS_REGEXP.test(expression)) {
-        const [extracted, number1, operand, number2] = PLUS_MINUS_REGEXP.exec(expression);
-        const result = calculate(number1, operand, number2);
-        expression = expression.replace(extracted, result);
-        return processInput(expression);
-    } else if (MOD_REGEXP.test(expression)) {
-        const [extracted, number1, number2] = MOD_REGEXP.exec(expression);
-        const result = calculate(number1, "mod", number2);
-        expression = expression.replace(extracted, result);
-        return processInput(expression);
+function showResult() {
+    if (equation.length < 1) {
+        return;
+    }
+    const result = parseInput(equation);
+    console.log(result);
+    if (!result.match(/^\d+\.?\d*$/)) {
+        updateInfo("Malformed expression");
+        return;
+    }
+    parseInput(equation);
+    if (inputInfoEl.textContent) {
+        clearInfo();
+    }
+    updateHistory(equation, result);
+    clearEquation();
+}
+
+function updateEquation(value) {
+    equation += value;
+}
+
+function replaceEquation(value) {
+    equation = value;
+}
+
+function clearEquation() {
+    equation = "";
+}
+
+function updateInputEl() {
+    let equationForInsert = equation;
+    if (equationForInsert.includes("**2")) {
+        equationForInsert = equationForInsert.replaceAll("**2", "<sup>2</sup>");
+    }
+    inputPanelEl.innerHTML = equationForInsert;
+}
+
+function removeOneCharacter() {
+    if (
+        equation.length !== 2 &&
+        (equation.lastIndexOf("**2") === equation.length - 3 || equation.lastIndexOf("mod") === equation.length - 3)
+    ) {
+        equation = equation.slice(0, -3);
     } else {
-        return expression;
+        equation = equation.slice(0, -1);
     }
 }
 
-function calculate(number1, operand, number2) {
-    switch (operand) {
-        case "+":
-            return +number1 + +number2;
-        case "-":
-            return number1 - number2;
-        case "×":
-            return number1 * number2;
-        case "÷":
-            return number1 / number2;
-        case "**2":
-            return number1 ** 2;
-        case "root":
-            return Math.sqrt(number1);
-        case "mod":
-            return number1 % number2;
-        case "percent":
-            return number1 / 100;
-        default:
-            throw new Error("Input is incorrect");
+function updateHistory(equation, result) {
+    const historyLine = document.createElement("div");
+    historyLine.className = "history__line";
+    const historyLeft = document.createElement("div");
+    historyLeft.className = "history__left wrap";
+    historyLeft.textContent = equation;
+    historyLeft.title = equation;
+    const historyCenter = document.createElement("div");
+    historyCenter.className = "history__center";
+    const historyRight = document.createElement("div");
+    historyRight.className = "history__right wrap";
+    historyRight.textContent = result;
+    historyRight.title = result;
+    historyLine.append(historyLeft, historyCenter, historyRight);
+    historyEl.insertAdjacentElement("afterbegin", historyLine);
+}
+
+function updateInfo(info) {
+    inputInfoEl.textContent = info;
+}
+
+function clearInfo() {
+    inputInfoEl.textContent = "";
+}
+
+function isNumberAllowed() {
+    if (equation.slice(equation.length - 1) === "π") {
+        return false;
     }
+    return true;
+}
+
+function isDoteAllowed() {
+    const indexOfLastDot = equation.lastIndexOf(".");
+    if (indexOfLastDot === -1) {
+        return true;
+    }
+    const extraction = equation.slice(indexOfLastDot);
+    if (!extraction.match(/[\+|-|×|÷]/)) {
+        return false;
+    }
+    if (isPreviousDot()) {
+        return false;
+    }
+    return true;
+}
+
+function isParenthesesAllowed(character) {
+    if (equation[equation.length - 1] === "." || equation.slice(equation.length - 3) === "mod") {
+        return false;
+    }
+    if (character !== "(" && !equation.includes("(")) {
+        return false;
+    }
+    return true;
+}
+
+function isPreviousPercentOrMod() {
+    if (equation[equation.length - 1] === "%" || equation.slice(equation.length - 3) === "mod") {
+        return true;
+    }
+    return false;
+}
+
+function isSignBeforePresent(sign) {
+    if (equation.slice(equation.length - sign.length) === sign) {
+        return true;
+    }
+    return false;
+}
+
+function isPreviousNumber() {
+    if (
+        (typeof +equation[equation.length - 1] === "number" && !isNaN(+equation[equation.length - 1])) ||
+        equation[equation.length - 1] === "π"
+    ) {
+        return true;
+    }
+    return false;
+}
+
+function isPreviousDot() {
+    if (equation[equation.length - 1] === ".") {
+        return true;
+    }
+    return false;
+}
+
+function isPreviousParentheses() {
+    return equation[equation.length - 1] === ")";
 }

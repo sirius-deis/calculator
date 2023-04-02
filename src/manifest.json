@@ -1,0 +1,23 @@
+{
+    "name": "Calculator App",
+    "short_name": "Calc",
+    "icons": [
+        { "src": "assets/images/android-chrome-192x192.png", "sizes": "192x192", "type": "image/png" },
+        { "src": "assets/images/android-chrome-512x512.png", "sizes": "512x512", "type": "image/png" },
+        {
+            "src": "assets/images/maskable_icon_x512.png",
+            "type": "image/png",
+            "sizes": "512x512",
+            "purpose": "maskable"
+        }
+    ],
+    "theme_color": "#3f3f46",
+    "background_color": "#e5e7eb",
+    "id": "/index.html",
+    "start_url": "/index.html",
+    "display": "standalone",
+    "orientation": "portrait",
+    "scope": "/",
+    "prefer_related_applications": "Calculator js",
+    "description": "Simple Calculator App"
+}

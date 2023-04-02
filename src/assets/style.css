@@ -46,6 +46,7 @@
 
 body {
     background-color: var(--body-color);
+    position: relative;
 }
 
 .container {
@@ -54,9 +55,12 @@ body {
     align-items: center;
     flex-direction: column;
     width: 20%;
-    margin: 5% auto;
     overflow: hidden;
     border-radius: 10px;
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translate(-50%, 20%);
 }
 
 .history {

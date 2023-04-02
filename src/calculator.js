@@ -7,9 +7,14 @@ export const PLUS_MINUS_REGEXP = /(?<number1>\d+\.?\d*)(?<operand>[\+-])(?<numbe
 export const MOD_REGEXP = /(?<![+-×÷])(?<number1>\d+\.?\d*)mod(?<number2>\d+\.?\d*)/;
 
 export function parseInput(data) {
-    const parsedString = data.replaceAll("π", Math.PI).replace(/(\d+\.?\d*)\(/g, (match) => {
-        return `${match.slice(0, 1)}*${match.slice(1)}`;
-    });
+    const parsedString = data
+        .replaceAll("π", Math.PI)
+        .replace(/(\d+\.?\d*)\(/g, (match) => {
+            return `${match.slice(0, 1)}*${match.slice(1)}`;
+        })
+        .replace(/\)(\d+\.?\d*)/g, (match) => {
+            return `${match.slice(0, 1)}*${match.slice(1)}`;
+        });
     return processInput(parsedString);
 }
 

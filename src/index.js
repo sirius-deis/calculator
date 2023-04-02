@@ -2,7 +2,8 @@ import { parseInput } from "./calculator.js";
 const historyEl = document.querySelector(".history"),
     inputPanelEl = document.querySelector(".input__panel"),
     inputInfoEl = document.querySelector(".input__info"),
-    buttonsContainer = document.querySelector(".buttons");
+    buttonsContainer = document.querySelector(".buttons"),
+    dummyInputEl = document.querySelector(".input__dummy");
 
 let equation = "";
 
@@ -12,73 +13,70 @@ buttonsContainer.addEventListener("click", (e) => {
         return;
     }
     const dataset = Object.values(el.dataset)[0];
-    if (dataset === "number") {
-        updateEquation(el.textContent);
+    if (["number", "parentheses", "dot", "pi", "sign", "percent", "root", "mod"].includes(dataset)) {
+        checkValidity(el.textContent);
     }
-    if (dataset === "parentheses") {
-        if (!isParenthesesAllowed()) {
-            return;
-        }
-        updateEquation(el.textContent);
-    }
-    if (dataset === "dot") {
-        if (!checkIfPreviousIsNumber() || checkIfPreviousIsComma() || !isDoteAllowed()) {
-            return;
-        }
-        updateEquation(el.textContent);
-    }
-    if (dataset === "pi") {
-        if (checkIfSignBeforePresent("π")) {
-            return;
-        }
-        updateEquation(el.textContent);
-    }
-    if (dataset === "sign") {
-        if ((!checkIfPreviousIsNumber() && !checkIfPercentWithNumberIsPrevious()) || checkIfPreviousIsComma()) {
-            return;
-        }
-        updateEquation(el.textContent);
-    }
-    if (dataset === "percent") {
-        if (!checkIfPreviousIsNumber() || checkIfPreviousIsComma()) {
-            return;
-        }
-        updateEquation(el.textContent);
-    }
-    if (dataset === "root") {
-        if (
-            checkIfSignBeforePresent(el.textContent) ||
-            checkIfPreviousIsComma() ||
-            checkIfPreviousIsNumber() ||
-            checkIfPreviousIsPercentOrMod()
-        ) {
-            return;
-        }
-        updateEquation(el.textContent);
-    }
-    if (dataset === "mod") {
-        if (checkIfPreviousIsComma() || (!checkIfPreviousIsNumber() && !checkIfPercentWithNumberIsPrevious())) {
-            return;
-        }
-        updateEquation(el.textContent);
+
+    if (dataset === "**2") {
+        checkValidity(dataset);
     }
     if (dataset === "clear") {
-        clearInput();
-    }
-    if (dataset === "**") {
-        if (checkIfPreviousIsComma() || checkIfSignBeforePresent("**2") || !checkIfPreviousIsNumber()) {
-            return;
-        }
-        updateEquation("**2");
+        removeOneCharacter();
     }
     if (dataset === "equal") {
-        const result = parseInput(equation);
-        parseInput(equation);
-        updateHistory(equation, result);
-        clearEquation();
+        showResult();
     }
 
     updateInputEl();
+});
+
+inputPanelEl.addEventListener("click", () => {
+    dummyInputEl.value = "";
+    dummyInputEl.focus();
+});
+
+window.addEventListener("keydown", (e) => {
+    const code = e.code;
+    const shift = e.shiftKey;
+    if (code.startsWith("Digit") && !shift) {
+        checkValidity(code.slice(code.length - 1));
+    }
+    if (["Digit9", "Digit0"].includes(code) && shift) {
+        checkValidity(code.endsWith("9") ? "(" : ")");
+    }
+    if (["Backslash", "Digit8", "Equal", "Minus", "Digit5"].includes(code) && shift) {
+        let digit;
+        if (code === "Backslash") {
+            digit = "÷";
+        } else if (code === "Digit8") {
+            digit = "×";
+        } else if (code === "Equal") {
+            digit = "+";
+        } else if (code === "Minus") {
+            digit = "-";
+        } else {
+            digit = "%";
+        }
+        checkValidity(digit);
+    }
+    if (code === "Backspace") {
+        removeOneCharacter();
+    }
+    if (code === "Enter") {
+        showResult();
+    }
+    updateInputEl();
+});
+
+dummyInputEl.addEventListener("input", (e) => {
+    const data = e.target.value;
+    if (data.length > 1) {
+        for (let i = 0; i < data.length; i++) {
+            checkValidity(data[i]);
+        }
+        updateInputEl();
+    }
+    e.target.value = "";
 });
 
 document.querySelector('[data-sign="clear"]').addEventListener("contextmenu", (e) => {
@@ -88,11 +86,87 @@ document.querySelector('[data-sign="clear"]').addEventListener("contextmenu", (e
 });
 
 historyEl.addEventListener("click", (e) => {
-    const el = e.target.closest(".history__line");
-    const equation = el.firstElementChild.textContent;
-    replaceEquation(equation);
+    const target = e.target;
+    const line = target.closest(".history__line");
+    if (!line) return;
+    let equation;
+    if (target.className.includes("history__left")) {
+        equation = line.firstElementChild.textContent;
+        replaceEquation(equation);
+    }
+    if (target.className.includes("history__right") && isNumberAllowed()) {
+        equation = line.lastElementChild.textContent;
+        updateEquation(equation);
+    }
     updateInputEl();
 });
+
+function checkValidity(character) {
+    if (typeof +character === "number" && !isNaN(+character)) {
+        updateEquation(character);
+    }
+    if (["(", ")"].includes(character)) {
+        if (!isParenthesesAllowed()) {
+            return;
+        }
+        updateEquation(character);
+    }
+    if (character === ".") {
+        if (!checkIfPreviousIsNumber() || checkIfPreviousIsDot() || !isDoteAllowed()) {
+            return;
+        }
+        updateEquation(character);
+    }
+    if (character === "π") {
+        if (checkIfSignBeforePresent("π")) {
+            return;
+        }
+        updateEquation(character);
+    }
+    if (["+", "-", "×", "÷"].includes(character)) {
+        if ((!checkIfPreviousIsNumber() && !checkIfPercentWithNumberIsPrevious()) || checkIfPreviousIsDot()) {
+            return;
+        }
+        updateEquation(character);
+    }
+    if (character === "%") {
+        if (!checkIfPreviousIsNumber() || checkIfPreviousIsDot()) {
+            return;
+        }
+        updateEquation(character);
+    }
+    if (character === "√") {
+        if (
+            checkIfSignBeforePresent(character) ||
+            checkIfPreviousIsDot() ||
+            checkIfPreviousIsNumber() ||
+            checkIfPreviousIsPercentOrMod()
+        ) {
+            return;
+        }
+        updateEquation(character);
+    }
+    if (character === "mod") {
+        if (checkIfPreviousIsDot() || (!checkIfPreviousIsNumber() && !checkIfPercentWithNumberIsPrevious())) {
+            return;
+        }
+        updateEquation(character);
+    }
+
+    if (character === "**2") {
+        if (checkIfPreviousIsDot() || checkIfSignBeforePresent("**2") || !checkIfPreviousIsNumber()) {
+            return;
+        }
+        updateEquation(character);
+    }
+}
+
+function showResult() {
+    const result = parseInput(equation);
+    parseInput(equation);
+    updateHistory(equation, result);
+    clearEquation();
+}
 
 function updateEquation(value) {
     equation += value;
@@ -114,7 +188,7 @@ function updateInputEl() {
     inputPanelEl.innerHTML = equationForInsert;
 }
 
-function clearInput() {
+function removeOneCharacter() {
     if (
         equation.length !== 2 &&
         (equation.lastIndexOf("**2") === equation.length - 3 || equation.lastIndexOf("mod") === equation.length - 3)
@@ -129,7 +203,7 @@ function updateHistory(equation, result) {
     const historyLine = document.createElement("div");
     historyLine.className = "history__line";
     historyLine.innerHTML = `
-        <div class="history__left wrap"><span>${equation}</span></div>
+        <div class="history__left wrap">${equation}</div>
         <div class="history__center">=</div>
         <div class="history__right wrap">${result}</div>
     `;
@@ -148,6 +222,13 @@ function updateInfo(info) {
 //#TODO:
 function clearInfo() {
     inputInfoEl.textContent = "";
+}
+
+function isNumberAllowed() {
+    if (["+", "-", "×", "÷"].includes(equation[equation.length - 1])) {
+        return true;
+    }
+    return false;
 }
 
 function isDoteAllowed() {
@@ -197,7 +278,7 @@ function checkIfPercentWithNumberIsPrevious() {
     return false;
 }
 
-function checkIfPreviousIsComma() {
+function checkIfPreviousIsDot() {
     if (equation[equation.length - 1] === ".") {
         return true;
     }

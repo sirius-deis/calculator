@@ -21,6 +21,29 @@
     --green-darker-color: #3f6212;
 }
 
+/* width */
+::-webkit-scrollbar {
+    width: 1px;
+    position: relative;
+    top: 0;
+    right: 0;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+    background: var(--white-darker-color);
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+    background: var(--white-darker-color);
+}
+
 body {
     background-color: var(--body-color);
 }
@@ -44,7 +67,7 @@ body {
     background-color: var(--bg-color);
     height: 30rem;
     color: var(--white-color);
-    overflow: scroll;
+    overflow-y: scroll;
 }
 
 .history__line {
@@ -59,7 +82,7 @@ body {
     border-bottom: 1px solid var(--main-color);
 }
 
-.history__left span {
+.history__left {
     cursor: pointer;
 }
 
@@ -87,6 +110,8 @@ body {
 
 .input__panel {
     width: 100%;
+    min-height: 5rem;
+    position: relative;
     padding: 1.3rem;
     font-size: 2rem;
     background-color: transparent;
@@ -100,6 +125,15 @@ body {
 
 .input__panel:focus {
     outline: none;
+}
+
+.input__dummy {
+    position: absolute;
+    width: 0;
+    height: 0;
+    top: 0;
+    left: 0;
+    opacity: 0;
 }
 
 .input__info {

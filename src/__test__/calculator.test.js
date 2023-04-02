@@ -8,7 +8,7 @@ import {
     PARENTHESES_REGEXP,
     MOD_REGEXP,
     SQUARE_REGEXP,
-    processInput,
+    parseInput,
 } from "../calculator";
 
 describe("#PLUS_MINUS_REGEXP", () => {
@@ -237,60 +237,70 @@ describe("#SQUARE_REGEXP", () => {
     });
 });
 
-describe("#processInput", () => {
-    it("should return 8result of addition on 68 and 19", () => {
-        const data = "68+19";
-        const result = processInput(data);
-        expect(result).toBe((68 + 19).toString());
+describe("#parseInput", () => {
+    describe("addition and division", () => {
+        it("should return result of addition on 68 and 19", () => {
+            const data = "68+19";
+            const result = parseInput(data);
+            expect(result).toBe((68 + 19).toString());
+        });
+        it("should return result of addition on 14.314 and 132.4214", () => {
+            const data = "14.314+132.421";
+            const result = parseInput(data);
+            expect(result).toBe((14.314 + 132.421).toString());
+        });
+        it("should return result of subtraction on 63.235 and 14.214", () => {
+            const data = "63.235-14.21";
+            const result = parseInput(data);
+            expect(result).toBe((63.235 - 14.21).toString());
+        });
     });
-    it("should return 8result of addition on 14.314 and 132.4214", () => {
-        const data = "14.314+132.421";
-        const result = processInput(data);
-        expect(result).toBe((14.314 + 132.421).toString());
+    describe("multiplication and division", () => {
+        it("should return result of multiplication on 25.252 and 3.242", () => {
+            const data = "25.252×3.242";
+            const result = parseInput(data);
+            expect(result).toBe((25.252 * 3.242).toString());
+        });
+        it("should return result of division on 532.352 and 241.5224", () => {
+            const data = "532.352÷241.5224";
+            const result = parseInput(data);
+            expect(result).toBe((532.352 / 241.5224).toString());
+        });
     });
-    it("should return result of subtraction on 63.235 and 14.214", () => {
-        const data = "63.235-14.21";
-        const result = processInput(data);
-        expect(result).toBe((63.235 - 14.21).toString());
+    describe("square", () => {
+        it("should return result of square of 4", () => {
+            const data = "4**2";
+            const result = parseInput(data);
+            expect(result).toBe((4 ** 2).toString());
+        });
+        it("should return result of square of 15.342", () => {
+            const data = "15.342**2";
+            const result = parseInput(data);
+            expect(result).toBe((15.342 ** 2).toString());
+        });
     });
-    it("should return result of multiplication on 25.252 and 3.242", () => {
-        const data = "25.252×3.242";
-        const result = processInput(data);
-        expect(result).toBe((25.252 * 3.242).toString());
+    describe("square root", () => {
+        it("should return result of square root of 8", () => {
+            const data = "√8";
+            const result = parseInput(data);
+            expect(result).toBe(Math.sqrt(8).toString());
+        });
+        it("should return result of square root of 285.2322", () => {
+            const data = "√285.2322";
+            const result = parseInput(data);
+            expect(result).toBe(Math.sqrt(285.2322).toString());
+        });
     });
-    it("should return result of division on 532.352 and 241.5224", () => {
-        const data = "532.352÷241.5224";
-        const result = processInput(data);
-        expect(result).toBe((532.352 / 241.5224).toString());
-    });
-    it("should return result of square of 4", () => {
-        const data = "4**2";
-        const result = processInput(data);
-        expect(result).toBe((4 ** 2).toString());
-    });
-    it("should return result of square of 15.342", () => {
-        const data = "15.342**2";
-        const result = processInput(data);
-        expect(result).toBe((15.342 ** 2).toString());
-    });
-    it("should return result of square root of 8", () => {
-        const data = "√8";
-        const result = processInput(data);
-        expect(result).toBe(Math.sqrt(8).toString());
-    });
-    it("should return result of square root of 285.2322", () => {
-        const data = "√285.2322";
-        const result = processInput(data);
-        expect(result).toBe(Math.sqrt(285.2322).toString());
-    });
-    it("should return 16% in number", () => {
-        const data = "16%";
-        const result = processInput(data);
-        expect(result).toBe((16 / 100).toString());
-    });
-    it("should return 254.242% in number", () => {
-        const data = "254.242%";
-        const result = processInput(data);
-        expect(result).toBe((254.242 / 100).toString());
+    describe("percent", () => {
+        it("should return 16% in number", () => {
+            const data = "16%";
+            const result = parseInput(data);
+            expect(result).toBe((16 / 100).toString());
+        });
+        it("should return 254.242% in number", () => {
+            const data = "254.242%";
+            const result = parseInput(data);
+            expect(result).toBe((254.242 / 100).toString());
+        });
     });
 });

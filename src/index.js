@@ -1,4 +1,4 @@
-import { processInput } from "./calculator.js";
+import { parseInput } from "./calculator.js";
 const historyEl = document.querySelector(".history"),
     inputPanelEl = document.querySelector(".input__panel"),
     inputInfoEl = document.querySelector(".input__info"),
@@ -12,7 +12,13 @@ buttonsContainer.addEventListener("click", (e) => {
         return;
     }
     const dataset = Object.values(el.dataset)[0];
-    if (dataset === "number" || dataset === "parentheses") {
+    if (dataset === "number") {
+        updateData(el.textContent);
+    }
+    if (dataset === "parentheses") {
+        if (!isDoteAllowed()) {
+            return;
+        }
         updateData(el.textContent);
     }
     if (dataset === "dot") {
@@ -66,7 +72,8 @@ buttonsContainer.addEventListener("click", (e) => {
         updateData("**2");
     }
     if (dataset === "equal") {
-        const result = processInput(data);
+        const result = parseInput(data);
+        parseInput(data);
         console.log(result);
     }
 
@@ -102,7 +109,12 @@ function isDoteAllowed() {
     return false;
 }
 
-function isParenthesesAllowed() {}
+function isParenthesesAllowed() {
+    if (data[data.length - 1] === ".") {
+        return false;
+    }
+    return true;
+}
 
 function checkIfPreviousIsPercentOrMod() {
     if (data[data.length - 1] === "%" || data.slice(data.length - 3) === "mod") {

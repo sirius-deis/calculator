@@ -1,4 +1,3 @@
-export const PI_REGEXP = /π/;
 export const SQUARE_REGEXP = /(?<number>\d+\.?\d*)(?<operand>\*{2}2)/;
 export const ROOT_REGEXP = /√\s*(?<number>\d+\.?\d*)/;
 export const PERCENT_REGEXP = /(?<number>\d+\.?\d*)%/;
@@ -6,6 +5,13 @@ export const PARENTHESES_REGEXP = /\((?<equation>[^\(\)]+)\)/;
 export const MULTIPLY_DIVISION_REGEXP = /(?<number1>\d+\.?\d*)(?<operand>[×÷])(?<number2>\d+\.?\d*)/;
 export const PLUS_MINUS_REGEXP = /(?<number1>\d+\.?\d*)(?<operand>[\+-])(?<number2>\d+\.?\d*)/;
 export const MOD_REGEXP = /(?<![+-×÷])(?<number1>\d+\.?\d*)mod(?<number2>\d+\.?\d*)/;
+
+export function parseInput(data) {
+    const parsedString = data.replaceAll("π", Math.PI).replace(/(\d+\.?\d*)\(/g, (match, p1, p2, p3, p4, p5) => {
+        return `${match.slice(0, 1)}*${match.slice(1)}`;
+    });
+    return processInput(parsedString);
+}
 
 export function processInput(data) {
     let expression = data;

@@ -1,3 +1,4 @@
+export const PI_REGEXP = /π/;
 export const SQUARE_REGEXP = /(?<number>\d+\.?\d*)(?<operand>\*{2}2)/;
 export const ROOT_REGEXP = /√\s*(?<number>\d+\.?\d*)/;
 export const PERCENT_REGEXP = /(?<number>\d+\.?\d*)%/;

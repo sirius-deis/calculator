@@ -8,9 +8,23 @@ let data = "";
 
 buttonsContainer.addEventListener("click", (e) => {
     const el = e.target.closest(".button");
+    if (!el) {
+        return;
+    }
     const dataset = Object.values(el.dataset)[0];
-    if (!dataset) return;
-    if (dataset === "number" || dataset === "parentheses" || dataset === "pi" || dataset === "dot") {
+    if (dataset === "number" || dataset === "parentheses") {
+        updateData(el.textContent);
+    }
+    if (dataset === "dot") {
+        if (!checkIfPreviousIsNumber() || checkIfPreviousIsComma() || !isDoteAllowed()) {
+            return;
+        }
+        updateData(el.textContent);
+    }
+    if (dataset === "pi") {
+        if (checkIfSignBeforePresent("π")) {
+            return;
+        }
         updateData(el.textContent);
     }
     if (dataset === "sign") {
@@ -75,6 +89,21 @@ function clearInput() {
         data = data.slice(0, -1);
     }
 }
+
+function isDoteAllowed() {
+    const indexOfLastDot = data.lastIndexOf(".");
+    if (indexOfLastDot === -1) {
+        return true;
+    }
+    const extraction = data.slice(indexOfLastDot);
+    if (extraction.includes("+") || extraction.includes("-") || extraction.includes("×") || extraction.includes("÷")) {
+        return true;
+    }
+    return false;
+}
+
+function isParenthesesAllowed() {}
+
 function checkIfPreviousIsPercentOrMod() {
     if (data[data.length - 1] === "%" || data.slice(data.length - 3) === "mod") {
         return true;

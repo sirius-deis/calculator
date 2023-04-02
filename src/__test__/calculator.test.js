@@ -303,4 +303,18 @@ describe("#parseInput", () => {
             expect(result).toBe((254.242 / 100).toString());
         });
     });
+    describe("random inputs", () => {
+        it("should return result of ((4+6)*4-4*√2)*π", () => {
+            const data = "((4+6)×4-4×√2)×π";
+            const result = parseInput(data);
+            const correctResult = ((4 + 6) * 4 - 4 * Math.sqrt(2)) * Math.PI;
+            expect(result).toBe(correctResult.toString());
+        });
+        it("should return result of ((4+76)/2**2*24-√42)*π", () => {
+            const data = "((4+76)÷2**2×24-√42)×π";
+            const result = parseInput(data);
+            const correctResult = (((4 + 76) / 2 ** 2) * 24 - Math.sqrt(42)) * Math.PI;
+            expect(result).toBe(correctResult.toString());
+        });
+    });
 });

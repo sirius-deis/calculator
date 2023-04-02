@@ -59,6 +59,12 @@ buttonsContainer.addEventListener("click", (e) => {
     updateInputEl();
 });
 
+document.querySelector('[data-sign="clear"]').addEventListener("contextmenu", (e) => {
+    e.preventDefault();
+    data = "";
+    updateInputEl();
+});
+
 function clearInput() {
     if (
         data.length !== 2 &&

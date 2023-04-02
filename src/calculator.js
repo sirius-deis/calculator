@@ -1,9 +1,9 @@
 export const SQUARE_REGEXP = /(?<number>\d+\.?\d*)(?<operand>\*{2}2)/;
 export const ROOT_REGEXP = /√\s*(?<number>\d+\.?\d*)/;
 export const PERCENT_REGEXP = /(?<number>\d+\.?\d*)%/;
+export const PARENTHESES_REGEXP = /\((?<equation>[^\(\)]+)\)/;
 export const MULTIPLY_DIVISION_REGEXP = /(?<number1>\d+\.?\d*)(?<operand>[×÷])(?<number2>\d+\.?\d*)/;
 export const PLUS_MINUS_REGEXP = /(?<number1>\d+\.?\d*)(?<operand>[\+-])(?<number2>\d+\.?\d*)/;
-export const PARENTHESES_REGEXP = /\((?<expression>[^\(\)]+)\)/;
 export const MOD_REGEXP = /(?<![+-×÷])(?<number1>\d+\.?\d*)mod(?<number2>\d+\.?\d*)/;
 
 export function processInput(data) {
@@ -21,6 +21,12 @@ export function processInput(data) {
     } else if (PERCENT_REGEXP.test(expression)) {
         const [extracted, number] = PERCENT_REGEXP.exec(expression);
         const result = calculate(number, "percent");
+        expression = expression.replace(extracted, result);
+        return processInput(expression);
+    } else if (PARENTHESES_REGEXP.test(expression)) {
+        const [extracted, equation] = PARENTHESES_REGEXP.exec(expression);
+        console.log(equation);
+        const result = processInput(equation);
         expression = expression.replace(extracted, result);
         return processInput(expression);
     } else if (MULTIPLY_DIVISION_REGEXP.test(expression)) {

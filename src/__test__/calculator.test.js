@@ -7,6 +7,8 @@ import {
     ROOT_REGEXP,
     PARENTHESES_REGEXP,
     MOD_REGEXP,
+    SQUARE_REGEXP,
+    processInput,
 } from "../calculator";
 
 describe("#PLUS_MINUS_REGEXP", () => {
@@ -181,5 +183,68 @@ describe("#MOD_REGEXP", () => {
         const data = "45.25mod√5.1";
         const result = MOD_REGEXP.test(data);
         expect(result).toBeFalsy();
+    });
+});
+
+describe("#SQUARE_REGEXP", () => {
+    it("should return true with integer", () => {
+        const data = "3**2";
+        const result = SQUARE_REGEXP.test(data);
+        expect(result).toBeTruthy();
+    });
+    it("should return true with decimal number", () => {
+        const data = "3.542**2";
+        const result = SQUARE_REGEXP.test(data);
+        expect(result).toBeTruthy();
+    });
+    it("should return false as there is no square operation there but multiplication", () => {
+        const data = "3.5*2";
+        const result = SQUARE_REGEXP.test(data);
+        expect(result).toBeFalsy();
+    });
+    it("should return false as there is no square operation there but multiplication and multiplication again", () => {
+        const data = "3.542*2*";
+        const result = SQUARE_REGEXP.test(data);
+        expect(result).toBeFalsy();
+    });
+    it("should return number with integer", () => {
+        const data = "3**2";
+        const { number, operand } = data.match(SQUARE_REGEXP).groups;
+        expect(number).toBe("3");
+        expect(operand).toBe("**2");
+    });
+    it("should return number with decimal", () => {
+        const data = "3.542**2";
+        const { number, operand } = data.match(SQUARE_REGEXP).groups;
+        expect(number).toBe("3.542");
+        expect(operand).toBe("**2");
+    });
+});
+
+describe("#processInput", () => {
+    it("should return 8result of addition on 68 and 19", () => {
+        const data = "68+19";
+        const result = processInput(data);
+        expect(result).toBe((68 + 19).toString());
+    });
+    it("should return 8result of addition on 14.314 and 132.4214", () => {
+        const data = "14.314+132.421";
+        const result = processInput(data);
+        expect(result).toBe((14.314 + 132.421).toString());
+    });
+    it("should return result of subtraction on 63.235 and 14.214", () => {
+        const data = "63.235-14.21";
+        const result = processInput(data);
+        expect(result).toBe((63.235 - 14.21).toString());
+    });
+    it("should return result of multiplication on 25.252 and 3.242", () => {
+        const data = "25.252×3.242";
+        const result = processInput(data);
+        expect(result).toBe((25.252 * 3.242).toString());
+    });
+    it("should return result of division on 532.352 and 241.5224", () => {
+        const data = "532.352÷241.5224";
+        const result = processInput(data);
+        expect(result).toBe((532.352 / 241.5224).toString());
     });
 });

@@ -1,3 +1,4 @@
+import { processInput } from "./calculator.js";
 const historyEl = document.querySelector(".history"),
     inputPanelEl = document.querySelector(".input__panel"),
     inputInfoEl = document.querySelector(".input__info"),
@@ -9,7 +10,7 @@ buttonsContainer.addEventListener("click", (e) => {
     const el = e.target.closest(".button");
     const dataset = Object.values(el.dataset)[0];
     if (!dataset) return;
-    if (dataset === "number" || dataset === "parentheses" || dataset === "pi" || dataset === "comma") {
+    if (dataset === "number" || dataset === "parentheses" || dataset === "pi" || dataset === "dot") {
         updateData(el.textContent);
     }
     if (dataset === "sign") {
@@ -51,7 +52,8 @@ buttonsContainer.addEventListener("click", (e) => {
         updateData("**2");
     }
     if (dataset === "equal") {
-        console.log("equal");
+        const result = processInput(data);
+        console.log(result);
     }
 
     updateInputEl();
@@ -96,7 +98,7 @@ function checkIfPercentWithNumberIsPrevious() {
 }
 
 function checkIfPreviousIsComma() {
-    if (data[data.length - 1] === ",") {
+    if (data[data.length - 1] === ".") {
         return true;
     }
     return false;

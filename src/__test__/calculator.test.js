@@ -283,4 +283,14 @@ describe("#processInput", () => {
         const result = processInput(data);
         expect(result).toBe(Math.sqrt(285.2322).toString());
     });
+    it("should return 16% in number", () => {
+        const data = "16%";
+        const result = processInput(data);
+        expect(result).toBe((16 / 100).toString());
+    });
+    it("should return 254.242% in number", () => {
+        const data = "254.242%";
+        const result = processInput(data);
+        expect(result).toBe((254.242 / 100).toString());
+    });
 });

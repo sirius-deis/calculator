@@ -4,7 +4,7 @@ const historyEl = document.querySelector(".history"),
     inputInfoEl = document.querySelector(".input__info"),
     buttonsContainer = document.querySelector(".buttons");
 
-let data = "";
+let equation = "";
 
 buttonsContainer.addEventListener("click", (e) => {
     const el = e.target.closest(".button");
@@ -13,37 +13,37 @@ buttonsContainer.addEventListener("click", (e) => {
     }
     const dataset = Object.values(el.dataset)[0];
     if (dataset === "number") {
-        updateData(el.textContent);
+        updateEquation(el.textContent);
     }
     if (dataset === "parentheses") {
-        if (!isDoteAllowed()) {
+        if (!isParenthesesAllowed()) {
             return;
         }
-        updateData(el.textContent);
+        updateEquation(el.textContent);
     }
     if (dataset === "dot") {
         if (!checkIfPreviousIsNumber() || checkIfPreviousIsComma() || !isDoteAllowed()) {
             return;
         }
-        updateData(el.textContent);
+        updateEquation(el.textContent);
     }
     if (dataset === "pi") {
         if (checkIfSignBeforePresent("π")) {
             return;
         }
-        updateData(el.textContent);
+        updateEquation(el.textContent);
     }
     if (dataset === "sign") {
         if ((!checkIfPreviousIsNumber() && !checkIfPercentWithNumberIsPrevious()) || checkIfPreviousIsComma()) {
             return;
         }
-        updateData(el.textContent);
+        updateEquation(el.textContent);
     }
     if (dataset === "percent") {
         if (!checkIfPreviousIsNumber() || checkIfPreviousIsComma()) {
             return;
         }
-        updateData(el.textContent);
+        updateEquation(el.textContent);
     }
     if (dataset === "root") {
         if (
@@ -54,13 +54,13 @@ buttonsContainer.addEventListener("click", (e) => {
         ) {
             return;
         }
-        updateData(el.textContent);
+        updateEquation(el.textContent);
     }
     if (dataset === "mod") {
         if (checkIfPreviousIsComma() || (!checkIfPreviousIsNumber() && !checkIfPercentWithNumberIsPrevious())) {
             return;
         }
-        updateData(el.textContent);
+        updateEquation(el.textContent);
     }
     if (dataset === "clear") {
         clearInput();
@@ -69,12 +69,13 @@ buttonsContainer.addEventListener("click", (e) => {
         if (checkIfPreviousIsComma() || checkIfSignBeforePresent("**2") || !checkIfPreviousIsNumber()) {
             return;
         }
-        updateData("**2");
+        updateEquation("**2");
     }
     if (dataset === "equal") {
-        const result = parseInput(data);
-        parseInput(data);
-        console.log(result);
+        const result = parseInput(equation);
+        parseInput(equation);
+        updateHistory(equation, result);
+        clearEquation();
     }
 
     updateInputEl();
@@ -82,27 +83,79 @@ buttonsContainer.addEventListener("click", (e) => {
 
 document.querySelector('[data-sign="clear"]').addEventListener("contextmenu", (e) => {
     e.preventDefault();
-    data = "";
+    clearEquation();
     updateInputEl();
 });
 
+historyEl.addEventListener("click", (e) => {
+    const el = e.target.closest(".history__line");
+    const equation = el.firstElementChild.textContent;
+    replaceEquation(equation);
+    updateInputEl();
+});
+
+function updateEquation(value) {
+    equation += value;
+}
+
+function replaceEquation(value) {
+    equation = value;
+}
+
+function clearEquation() {
+    equation = "";
+}
+
+function updateInputEl() {
+    let equationForInsert = equation;
+    if (equationForInsert.includes("**2")) {
+        equationForInsert = equationForInsert.replaceAll("**2", "<sup>2</sup>");
+    }
+    inputPanelEl.innerHTML = equationForInsert;
+}
+
 function clearInput() {
     if (
-        data.length !== 2 &&
-        (data.lastIndexOf("**2") === data.length - 3 || data.lastIndexOf("mod") === data.length - 3)
+        equation.length !== 2 &&
+        (equation.lastIndexOf("**2") === equation.length - 3 || equation.lastIndexOf("mod") === equation.length - 3)
     ) {
-        data = data.slice(0, -3);
+        equation = equation.slice(0, -3);
     } else {
-        data = data.slice(0, -1);
+        equation = equation.slice(0, -1);
     }
 }
 
+function updateHistory(equation, result) {
+    const historyLine = document.createElement("div");
+    historyLine.className = "history__line";
+    historyLine.innerHTML = `
+        <div class="history__left wrap"><span>${equation}</span></div>
+        <div class="history__center">=</div>
+        <div class="history__right wrap">${result}</div>
+    `;
+    historyEl.insertAdjacentElement("afterbegin", historyLine);
+}
+
+//#TODO:
+function clearHistory() {
+    historyEl.innerHTML = "";
+}
+
+//#TODO:
+function updateInfo(info) {
+    inputInfoEl.textContent = info;
+}
+//#TODO:
+function clearInfo() {
+    inputInfoEl.textContent = "";
+}
+
 function isDoteAllowed() {
-    const indexOfLastDot = data.lastIndexOf(".");
+    const indexOfLastDot = equation.lastIndexOf(".");
     if (indexOfLastDot === -1) {
         return true;
     }
-    const extraction = data.slice(indexOfLastDot);
+    const extraction = equation.slice(indexOfLastDot);
     if (extraction.includes("+") || extraction.includes("-") || extraction.includes("×") || extraction.includes("÷")) {
         return true;
     }
@@ -110,55 +163,43 @@ function isDoteAllowed() {
 }
 
 function isParenthesesAllowed() {
-    if (data[data.length - 1] === ".") {
+    if (equation[equation.length - 1] === ".") {
         return false;
     }
     return true;
 }
 
 function checkIfPreviousIsPercentOrMod() {
-    if (data[data.length - 1] === "%" || data.slice(data.length - 3) === "mod") {
+    if (equation[equation.length - 1] === "%" || equation.slice(equation.length - 3) === "mod") {
         return true;
     }
     return false;
 }
 
 function checkIfSignBeforePresent(sign) {
-    if (data.slice(data.length - sign.length) === sign) {
+    if (equation.slice(equation.length - sign.length) === sign) {
         return true;
     }
     return false;
 }
 
 function checkIfPreviousIsNumber() {
-    if (typeof +data[data.length - 1] === "number" && !isNaN(+data[data.length - 1])) {
+    if (typeof +equation[equation.length - 1] === "number" && !isNaN(+equation[equation.length - 1])) {
         return true;
     }
     return false;
 }
 
 function checkIfPercentWithNumberIsPrevious() {
-    if (data.slice(data.length - 2).match(/\d%/)) {
+    if (equation.slice(equation.length - 2).match(/\d%/)) {
         return true;
     }
     return false;
 }
 
 function checkIfPreviousIsComma() {
-    if (data[data.length - 1] === ".") {
+    if (equation[equation.length - 1] === ".") {
         return true;
     }
     return false;
-}
-
-function updateData(value) {
-    data += value;
-}
-
-function updateInputEl() {
-    let dataForInsert = data;
-    if (dataForInsert.includes("**2")) {
-        dataForInsert = dataForInsert.replaceAll("**2", "<sup>2</sup>");
-    }
-    inputPanelEl.innerHTML = dataForInsert;
 }

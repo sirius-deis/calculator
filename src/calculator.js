@@ -7,13 +7,13 @@ export const PLUS_MINUS_REGEXP = /(?<number1>\d+\.?\d*)(?<operand>[\+-])(?<numbe
 export const MOD_REGEXP = /(?<![+-×÷])(?<number1>\d+\.?\d*)mod(?<number2>\d+\.?\d*)/;
 
 export function parseInput(data) {
-    const parsedString = data.replaceAll("π", Math.PI).replace(/(\d+\.?\d*)\(/g, (match, p1, p2, p3, p4, p5) => {
+    const parsedString = data.replaceAll("π", Math.PI).replace(/(\d+\.?\d*)\(/g, (match) => {
         return `${match.slice(0, 1)}*${match.slice(1)}`;
     });
     return processInput(parsedString);
 }
 
-export function processInput(data) {
+function processInput(data) {
     let expression = data;
     if (SQUARE_REGEXP.test(expression)) {
         const [extracted, number, operand] = SQUARE_REGEXP.exec(expression);
@@ -32,7 +32,6 @@ export function processInput(data) {
         return processInput(expression);
     } else if (PARENTHESES_REGEXP.test(expression)) {
         const [extracted, equation] = PARENTHESES_REGEXP.exec(expression);
-        console.log(equation);
         const result = processInput(equation);
         expression = expression.replace(extracted, result);
         return processInput(expression);
